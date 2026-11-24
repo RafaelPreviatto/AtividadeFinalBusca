@@ -26,18 +26,64 @@ class State:
 
     def neighbors(self) -> List["State"]:
         """Retorna os estados filhos válidos a partir deste estado."""
-        # TODO: implemente a geração de estados filhos
-        raise NotImplementedError
+        neighbors = []
 
+        blank = self.blank_index
+        row, col = divmod(blank, 3)
+
+        moves = [
+            (-1, 0, "UP"),
+            (1, 0, "DOWN"),
+            (0, -1, "LEFT"),
+            (0, 1, "RIGHT")
+        ]
+
+        for dr, dc, action in moves:
+            new_row = row + dr
+            new_col = col + dc
+
+            if 0 <= new_row < 3 and 0 <= new_col < 3:
+                new_index = new_row * 3 + new_col
+
+                tiles = list(self.tiles)
+
+                tiles[blank], tiles[new_index] = (
+                    tiles[new_index], tiles[blank]
+                )
+
+                neighbors.append(
+                    State(
+                        tuple(tiles),
+                        parent=self,
+                        action=action,
+                        cost=self.cost + 1
+                    )
+                )
+
+        return neighbors
+    
     def path(self) -> List["State"]:
         """Retorna a sequência de estados do estado inicial até este."""
-        # TODO: implemente a reconstrução do caminho usando self.parent
-        raise NotImplementedError
+        path = []
+        current = self
+
+        while current is not None:
+            path.append(current)
+            current = current.parent
+
+        path.reverse()
+
+        return path
 
     def actions(self) -> List[str]:
         """Retorna a sequência de ações do estado inicial até este."""
-        # TODO: implemente usando path()
-        raise NotImplementedError
+        actions = []
+
+        for state in self.path():
+            if state.action is not None:
+                actions.append(state.action)
+
+        return actions
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, State) and self.tiles == other.tiles
